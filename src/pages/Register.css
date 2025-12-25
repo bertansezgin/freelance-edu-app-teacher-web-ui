@@ -1,0 +1,10 @@
+/* ==================== REGISTER PAGE STYLES ==================== */
+/* Register sayfasına özel stiller */
+
+/* Register sayfası common.css'den auth-* class'larını kullanır */
+/* Bu dosyada sadece Register'a özel override'lar bulunur */
+
+.register-footer {
+  text-align: center;
+  padding-top: var(--spacing-4);
+}

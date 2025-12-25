@@ -1,0 +1,435 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { setAuthenticated } from '../utils/auth'
+import { useModalStack } from '../context/ModalStackContext'
+import '../styles/common.css'
+import './StudentsPage.css'
+
+const MOCK_STUDENT_DETAILS = {
+  1: {
+    studentNumber: '#12345',
+    birthDate: '15/03/2007',
+    completedHomework: 5,
+    pendingHomework: 2
+  },
+  2: {
+    studentNumber: '#12346',
+    birthDate: '22/07/2006',
+    completedHomework: 8,
+    pendingHomework: 1
+  },
+  3: {
+    studentNumber: '#12347',
+    birthDate: '10/11/2008',
+    completedHomework: 3,
+    pendingHomework: 4
+  },
+  4: {
+    studentNumber: '#12348',
+    birthDate: '05/09/2008',
+    completedHomework: 7,
+    pendingHomework: 0
+  },
+  5: {
+    studentNumber: '#12349',
+    birthDate: '18/01/2007',
+    completedHomework: 6,
+    pendingHomework: 3
+  },
+  6: {
+    studentNumber: '#12350',
+    birthDate: '30/12/2006',
+    completedHomework: 9,
+    pendingHomework: 1
+  },
+  7: {
+    studentNumber: '#12351',
+    birthDate: '14/06/2008',
+    completedHomework: 4,
+    pendingHomework: 2
+  },
+  8: {
+    studentNumber: '#12352',
+    birthDate: '27/04/2007',
+    completedHomework: 7,
+    pendingHomework: 1
+  },
+  9: {
+    studentNumber: '#12353',
+    birthDate: '08/08/2005',
+    completedHomework: 12,
+    pendingHomework: 0
+  },
+  10: {
+    studentNumber: '#12354',
+    birthDate: '19/02/2004',
+    completedHomework: 15,
+    pendingHomework: 0
+  }
+}
+
+const MOCK_STUDENTS = [
+  { id: 1, firstName: 'Ahmet', lastName: 'Yılmaz', school: 'Gazi Anadolu Lisesi', grade: '10. Sınıf' },
+  { id: 2, firstName: 'Fatma', lastName: 'Kaya', school: 'Atatürk Fen Lisesi', grade: '11. Sınıf' },
+  { id: 3, firstName: 'Mehmet', lastName: 'Demir', school: 'Cumhuriyet Ortaokulu', grade: '9. Sınıf' },
+  { id: 4, firstName: 'Ayşe', lastName: 'Çelik', school: 'Fatih Sultan Mehmet İlkokulu', grade: '9. Sınıf' },
+  { id: 5, firstName: 'Mustafa', lastName: 'Şahin', school: 'İnönü Mesleki ve Teknik Anadolu Lisesi', grade: '10. Sınıf' },
+  { id: 6, firstName: 'Zeynep', lastName: 'Koç', school: 'Tepebaşı Anadolu Lisesi', grade: '11. Sınıf' },
+  { id: 7, firstName: 'Ali', lastName: 'Öztürk', school: 'Gaziantep Anadolu Lisesi', grade: '9. Sınıf' },
+  { id: 8, firstName: 'Elif', lastName: 'Yıldız', school: 'Şehitkamil Fen Lisesi', grade: '10. Sınıf' },
+  { id: 9, firstName: 'Deniz', lastName: 'Arslan', school: 'Kadıköy Anadolu Lisesi', grade: '12. Sınıf' },
+  { id: 10, firstName: 'Burak', lastName: 'Güneş', school: 'İstanbul Üniversitesi', grade: 'Mezun' }
+]
+
+function StudentsPage() {
+  const navigate = useNavigate()
+  const { registerModal } = useModalStack()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedGrade, setSelectedGrade] = useState('Tüm Sınıflar')
+  const [selectedStudent, setSelectedStudent] = useState(null)
+
+  const grades = ['Tüm Sınıflar', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf', 'Mezun']
+
+  const filteredStudents = useMemo(() => {
+    let filtered = MOCK_STUDENTS
+
+    // Sınıf filtresi
+    if (selectedGrade !== 'Tüm Sınıflar') {
+      filtered = filtered.filter(student => student.grade === selectedGrade)
+    }
+
+    // Arama filtresi
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter(student =>
+        student.firstName.toLowerCase().includes(query) ||
+        student.lastName.toLowerCase().includes(query) ||
+        student.school.toLowerCase().includes(query)
+      )
+    }
+
+    return filtered
+  }, [searchQuery, selectedGrade])
+
+  const handleLogout = () => {
+    setAuthenticated(false)
+    navigate('/login', { replace: true })
+  }
+
+  const handleNavigation = (page) => {
+    switch (page) {
+      case 'home':
+        navigate('/dashboard')
+        break
+      case 'schedule':
+        navigate('/schedule')
+        break
+      case 'homework':
+        // TODO: Ödev & duyurular sayfasına yönlendirme
+        console.log('Navigate to homework')
+        break
+      case 'approvals':
+        // TODO: İstek onaylama sayfasına yönlendirme
+        console.log('Navigate to approvals')
+        break
+      case 'questionBank':
+        // TODO: Soru bankası sayfasına yönlendirme
+        console.log('Navigate to question bank')
+        break
+      case 'groups':
+        // TODO: Gruplar sayfasına yönlendirme
+        console.log('Navigate to groups')
+        break
+      case 'profile':
+        // TODO: Profil sayfasına yönlendirme
+        console.log('Navigate to profile')
+        break
+      case 'settings':
+        // TODO: Ayarlar sayfasına yönlendirme
+        console.log('Navigate to settings')
+        break
+      default:
+        break
+    }
+  }
+
+  const handleCreateGroup = () => {
+    // TODO: Grup oluşturma modalı veya sayfası
+    console.log('Create group')
+  }
+
+  const handleStudentClick = (student) => {
+    setSelectedStudent({ ...student, ...MOCK_STUDENT_DETAILS[student.id] })
+  }
+
+  const handleCloseModal = () => {
+    setSelectedStudent(null)
+  }
+
+  useEffect(() => {
+    if (!selectedStudent) return undefined
+    return registerModal('students-detail', handleCloseModal)
+  }, [selectedStudent, registerModal])
+
+  const handleDeleteStudent = (studentId, event) => {
+    event.stopPropagation() // Satır tıklama olayını engelle
+    // TODO: Öğrenci silme işlemi
+    console.log('Delete student:', studentId)
+  }
+
+  return (
+    <div className="layout-shell">
+      <aside className="layout-sidebar" aria-label="Ana menü">
+        <div className="sidebar-brand">
+          <div className="sidebar-brand__icon" aria-hidden="true">
+            <span className="material-symbols-outlined">school</span>
+          </div>
+          <div className="sidebar-brand__text">
+            <div className="sidebar-brand__title">EduTech</div>
+            <div className="sidebar-brand__subtitle">Öğretmen Paneli</div>
+          </div>
+        </div>
+
+        <nav className="sidebar-nav" aria-label="Sayfalar">
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('home')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              home
+            </span>
+            <span className="sidebar-link__text">Ana Sayfa</span>
+          </button>
+
+          <button type="button" className="sidebar-link sidebar-link--active">
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              groups
+            </span>
+            <span className="sidebar-link__text">Öğrencilerim</span>
+          </button>
+
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('schedule')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              calendar_month
+            </span>
+            <span className="sidebar-link__text">Ders Programı</span>
+          </button>
+
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('homework')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              assignment
+            </span>
+            <span className="sidebar-link__text">Ödevler &amp; Duyurular</span>
+          </button>
+
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('approvals')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              task_alt
+            </span>
+            <span className="sidebar-link__text">İstek Onaylama</span>
+          </button>
+
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('questionBank')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              quiz
+            </span>
+            <span className="sidebar-link__text">Soru Bankası</span>
+          </button>
+
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('groups')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              workspaces
+            </span>
+            <span className="sidebar-link__text">Gruplar</span>
+          </button>
+
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('profile')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              person
+            </span>
+            <span className="sidebar-link__text">Profil</span>
+          </button>
+        </nav>
+
+        <div className="sidebar-footer">
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('settings')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              settings
+            </span>
+            <span className="sidebar-link__text">Ayarlar</span>
+          </button>
+          <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              logout
+            </span>
+            <span className="sidebar-link__text">Çıkış Yap</span>
+          </button>
+        </div>
+      </aside>
+
+      <main className="layout-main">
+        <div className="students-page">
+          <header className="students-header">
+            <div className="students-header__content">
+              <h1 className="students-title">Öğrencilerim</h1>
+              <p className="students-subtitle">Bu sayfada kayıtlı tüm öğrencilerinizi görüntüleyebilir ve yönetebilirsiniz.</p>
+            </div>
+            <button type="button" className="students-create-group-btn" onClick={handleCreateGroup}>
+              <span className="material-symbols-outlined students-create-group-btn__icon" aria-hidden="true">
+                group_add
+              </span>
+              <span>Grup Oluştur</span>
+            </button>
+          </header>
+
+          <div className="students-filters">
+            <div className="students-search">
+              <div className="students-search__wrapper">
+                <div className="students-search__icon" aria-hidden="true">
+                  <span className="material-symbols-outlined">search</span>
+                </div>
+                <input
+                  type="text"
+                  className="students-search__input"
+                  placeholder="Öğrenci adı veya soyadına göre ara"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="students-grade-filter">
+              <span className="students-grade-filter__label">Sınıf:</span>
+              <div className="students-grade-filter__buttons">
+                {grades.map((grade) => (
+                  <button
+                    key={grade}
+                    type="button"
+                    className={`students-grade-filter__btn ${
+                      selectedGrade === grade ? 'students-grade-filter__btn--active' : ''
+                    }`}
+                    onClick={() => setSelectedGrade(grade)}
+                  >
+                    {grade}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="students-table-container">
+            <table className="students-table" role="table">
+              <thead className="students-table__head">
+                <tr>
+                  <th className="students-table__th" scope="col">Ad</th>
+                  <th className="students-table__th" scope="col">Soyad</th>
+                  <th className="students-table__th" scope="col">Okul</th>
+                  <th className="students-table__th" scope="col">Sınıf</th>
+                  <th className="students-table__th students-table__th--center" scope="col">İşlem</th>
+                </tr>
+              </thead>
+              <tbody className="students-table__body">
+                {filteredStudents.map((student) => (
+                  <tr
+                    key={student.id}
+                    className="students-table__row students-table__row--clickable"
+                    onClick={() => handleStudentClick(student)}
+                  >
+                    <td className="students-table__td students-table__td--name">{student.firstName}</td>
+                    <td className="students-table__td">{student.lastName}</td>
+                    <td className="students-table__td">{student.school}</td>
+                    <td className="students-table__td">{student.grade}</td>
+                    <td className="students-table__td students-table__td--center">
+                      <div className="students-table__actions">
+                        <button
+                          type="button"
+                          className="students-table__view-btn"
+                          title="Öğrenci detayını görüntüle"
+                          aria-label={`${student.firstName} ${student.lastName} öğrenci detayını görüntüle`}
+                        >
+                          <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="students-table__delete-btn"
+                          onClick={(e) => handleDeleteStudent(student.id, e)}
+                          title="Öğrenciyi sil"
+                          aria-label={`${student.firstName} ${student.lastName} öğrencisini sil`}
+                        >
+                          <span className="material-symbols-outlined" aria-hidden="true">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      {/* Student Detail Modal */}
+      {selectedStudent && (
+        <div className="students-modal-overlay" onClick={handleCloseModal}>
+          <div className="students-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="students-modal-close"
+              onClick={handleCloseModal}
+              aria-label="Modali kapat"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+
+            <div className="students-modal-header">
+              <div className="students-modal-avatar">
+                <span className="material-symbols-outlined" aria-hidden="true">person</span>
+              </div>
+              <h2 className="students-modal-title">
+                {selectedStudent.firstName} {selectedStudent.lastName}
+              </h2>
+            </div>
+
+            <div className="students-modal-info">
+              <div className="students-modal-info-grid">
+                <div className="students-modal-info-item">
+                  <span className="students-modal-info-label">Okul:</span>
+                  <span className="students-modal-info-value">{selectedStudent.school}</span>
+                </div>
+                <div className="students-modal-info-item">
+                  <span className="students-modal-info-label">Sınıf:</span>
+                  <span className="students-modal-info-value">{selectedStudent.grade}</span>
+                </div>
+                <div className="students-modal-info-item">
+                  <span className="students-modal-info-label">Öğrenci Numarası:</span>
+                  <span className="students-modal-info-value">{selectedStudent.studentNumber}</span>
+                </div>
+                <div className="students-modal-info-item">
+                  <span className="students-modal-info-label">Doğum Tarihi:</span>
+                  <span className="students-modal-info-value">{selectedStudent.birthDate}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="students-modal-homework">
+              <h3 className="students-modal-homework-title">Ödev Durumu</h3>
+              <div className="students-modal-homework-stats">
+                <div className="students-modal-homework-stat">
+                  <span className="students-modal-homework-stat-label">Tamamlanan Ödevler:</span>
+                  <span className="students-modal-homework-stat-value students-modal-homework-stat-value--completed">
+                    {selectedStudent.completedHomework}
+                  </span>
+                </div>
+                <div className="students-modal-homework-stat">
+                  <span className="students-modal-homework-stat-label">Açık Ödevler:</span>
+                  <span className="students-modal-homework-stat-value students-modal-homework-stat-value--pending">
+                    {selectedStudent.pendingHomework}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default StudentsPage
