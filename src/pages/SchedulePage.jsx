@@ -13,6 +13,7 @@ const MOCK_LESSONS = [
     day: 'Pazartesi',
     subject: 'Matematik',
     className: '8A',
+    description: 'Yeni konu anlatımı + kısa ödev kontrolü.',
     startTime: '09:00',
     endTime: '09:45',
     participants: ['Elif Kaya', 'Can Demir', 'Zeynep Yılmaz', 'Ahmet Arslan', 'Büşra Çetin', 'Deniz Aksoy']
@@ -22,6 +23,7 @@ const MOCK_LESSONS = [
     day: 'Salı',
     subject: 'Fen Bilimleri',
     className: '7B',
+    description: 'Deney raporu değerlendirmesi.',
     startTime: '10:00',
     endTime: '10:45',
     participants: ['Mert Savaş', 'Gül Şen', 'Kerem Tunç', 'Ece Yücel']
@@ -31,6 +33,7 @@ const MOCK_LESSONS = [
     day: 'Çarşamba',
     subject: 'Türkçe',
     className: '6C',
+    description: '',
     startTime: '13:00',
     endTime: '13:45',
     participants: ['Ozan Yıldız', 'Ayşe Deniz', 'Burak Öztürk', 'Selin Polat', 'Kaan Güneş']
@@ -52,6 +55,17 @@ const MOCK_STUDENTS = [
   'Selin Polat',
   'Kaan Güneş',
   'Deniz Aksoy',
+]
+
+const MOCK_GROUPS = [
+  '8A',
+  '7B',
+  '6C',
+  '9A',
+  '10B',
+  '8A Grup 1',
+  '7B Grup 2',
+  'TYT Grup',
 ]
 
 function addMinutesToTimeHHMM(timeHHMM, minutesToAdd) {
@@ -142,7 +156,9 @@ function SchedulePage() {
     startTime: '',
     subject: '',
     day: 'Pazartesi',
-    className: '',
+    groupQuery: '',
+    selectedGroups: [],
+    description: '',
     repeatWeeks: 1,
     studentQuery: '',
     selectedStudents: [],
@@ -201,6 +217,12 @@ function SchedulePage() {
     if (!query) return MOCK_STUDENTS
     return MOCK_STUDENTS.filter((student) => student.toLowerCase().includes(query))
   }, [lessonForm.studentQuery])
+
+  const filteredGroups = useMemo(() => {
+    const query = lessonForm.groupQuery.trim().toLowerCase()
+    if (!query) return MOCK_GROUPS
+    return MOCK_GROUPS.filter((group) => group.toLowerCase().includes(query))
+  }, [lessonForm.groupQuery])
 
   const weekDatesByDay = useMemo(() => {
     const monday = getMondayOfWeek(new Date())
@@ -264,7 +286,9 @@ function SchedulePage() {
       startTime: '',
       subject: '',
       day: 'Pazartesi',
-      className: '',
+      groupQuery: '',
+      selectedGroups: [],
+      description: '',
       repeatWeeks: 1,
       studentQuery: '',
       selectedStudents: [],
@@ -280,7 +304,9 @@ function SchedulePage() {
       startTime: '',
       subject: '',
       day: 'Pazartesi',
-      className: '',
+      groupQuery: '',
+      selectedGroups: [],
+      description: '',
       repeatWeeks: 1,
       studentQuery: '',
       selectedStudents: [],
@@ -290,11 +316,18 @@ function SchedulePage() {
   const handleEditLesson = (lesson) => {
     setLessonModalMode('edit')
     setEditingSeriesId(lesson.seriesId ?? lesson.id)
+    const existingGroups = Array.isArray(lesson.groupNames)
+      ? lesson.groupNames
+      : lesson.className && lesson.className !== '—'
+        ? [lesson.className]
+        : []
     setLessonForm({
       startTime: lesson.startTime ?? '',
       subject: lesson.subject ?? '',
       day: lesson.day ?? 'Pazartesi',
-      className: lesson.className === '—' ? '' : (lesson.className ?? ''),
+      groupQuery: '',
+      selectedGroups: existingGroups,
+      description: lesson.description ?? '',
       repeatWeeks: lesson.seriesWeekCount ?? 1,
       studentQuery: '',
       selectedStudents: lesson.participants ?? [],
@@ -349,6 +382,18 @@ function SchedulePage() {
     })
   }
 
+  const handleToggleGroup = (groupName) => {
+    setLessonForm((prev) => {
+      const exists = prev.selectedGroups.includes(groupName)
+      return {
+        ...prev,
+        selectedGroups: exists
+          ? prev.selectedGroups.filter((name) => name !== groupName)
+          : [...prev.selectedGroups, groupName],
+      }
+    })
+  }
+
   const handleLessonSubmit = (e) => {
     e.preventDefault()
 
@@ -361,6 +406,9 @@ function SchedulePage() {
     const safeRepeatWeeks = Math.min(Math.max(repeatWeeks, 1), 12)
     const seriesId = lessonModalMode === 'edit' ? (editingSeriesId ?? Date.now()) : Date.now()
     const endTime = addMinutesToTimeHHMM(startTime, LESSON_DURATION_MINUTES)
+    const description = lessonForm.description.trim()
+    const groupNames = lessonForm.selectedGroups
+    const classNameLabel = groupNames.length > 0 ? groupNames.join(', ') : '—'
 
     const newLessons = Array.from({ length: safeRepeatWeeks }, (_, index) => ({
       id: seriesId + index,
@@ -369,7 +417,9 @@ function SchedulePage() {
       seriesWeekCount: safeRepeatWeeks,
       day,
       subject,
-      className: lessonForm.className.trim() || '—',
+      className: classNameLabel,
+      groupNames,
+      description,
       startTime,
       endTime,
       participants: lessonForm.selectedStudents,
@@ -386,7 +436,9 @@ function SchedulePage() {
       startTime: '',
       subject: '',
       day: 'Pazartesi',
-      className: '',
+      groupQuery: '',
+      selectedGroups: [],
+      description: '',
       repeatWeeks: 1,
       studentQuery: '',
       selectedStudents: [],
@@ -400,6 +452,7 @@ function SchedulePage() {
           <div className="schedule-lesson-header__text">
             <p className="schedule-lesson-title">{lesson.subject}</p>
             <p className="schedule-lesson-class">Sınıf / Grup: {lesson.className}</p>
+            {lesson.description ? <p className="schedule-lesson-description">{lesson.description}</p> : null}
           </div>
           <div className="schedule-lesson-actions">
             <button
@@ -779,20 +832,56 @@ function SchedulePage() {
               </div>
 
               <div className="schedule-modal-form-group">
-                <label htmlFor="class-name" className="schedule-modal-label">Sınıf / Grup</label>
-                <select
-                  id="class-name"
-                  className="schedule-modal-select"
-                  value={lessonForm.className}
-                  onChange={(e) => setLessonForm((prev) => ({ ...prev, className: e.target.value }))}
-                >
-                  <option value="">Sınıf / Grup seçin (isteğe bağlı)</option>
-                  <option value="8A">8A</option>
-                  <option value="7B">7B</option>
-                  <option value="6C">6C</option>
-                  <option value="9A">9A</option>
-                  <option value="10B">10B</option>
-                </select>
+                <label htmlFor="lesson-description" className="schedule-modal-label">Açıklama</label>
+                <textarea
+                  id="lesson-description"
+                  className="schedule-modal-textarea"
+                  placeholder="Dersle ilgili not ekleyin (isteğe bağlı)"
+                  value={lessonForm.description}
+                  onChange={(e) => setLessonForm((prev) => ({ ...prev, description: e.target.value }))}
+                  rows={4}
+                />
+              </div>
+
+              <div className="schedule-modal-form-group">
+                <label htmlFor="group-selection" className="schedule-modal-label">Sınıf / Grup seçin</label>
+                <div className="schedule-modal-groups" id="group-selection">
+                  <div className="schedule-modal-groups__search">
+                    <span className="material-symbols-outlined schedule-modal-groups__search-icon" aria-hidden="true">
+                      search
+                    </span>
+                    <input
+                      type="search"
+                      className="schedule-modal-groups__search-input"
+                      placeholder="Sınıf / grup ara..."
+                      value={lessonForm.groupQuery}
+                      onChange={(e) => setLessonForm((prev) => ({ ...prev, groupQuery: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="schedule-modal-groups__list" role="list">
+                    {filteredGroups.map((groupName) => {
+                      const checked = lessonForm.selectedGroups.includes(groupName)
+                      return (
+                        <label key={groupName} className="schedule-modal-groups__item" role="listitem">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => handleToggleGroup(groupName)}
+                            className="schedule-modal-groups__checkbox"
+                          />
+                          <span className="schedule-modal-groups__name">{groupName}</span>
+                        </label>
+                      )
+                    })}
+
+                    {filteredGroups.length === 0 && (
+                      <div className="schedule-modal-groups__empty">
+                        <span className="schedule-modal-groups__empty-text">Grup bulunamadı</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="schedule-modal-form-group">

@@ -68,6 +68,113 @@ const MOCK_STUDENT_DETAILS = {
   }
 }
 
+const MOCK_QUESTION_ANALYTICS = {
+  1: [
+    {
+      subject: 'Matematik',
+      topics: [
+        { topic: 'Cebirsel İfadeler', count: 12 },
+        { topic: 'Denklemler', count: 8 },
+        { topic: 'Problemler', count: 5 },
+      ],
+    },
+    {
+      subject: 'Fen Bilimleri',
+      topics: [
+        { topic: 'Kuvvet ve Hareket', count: 6 },
+        { topic: 'Elektrik Devreleri', count: 4 },
+      ],
+    },
+  ],
+  2: [
+    {
+      subject: 'Türkçe',
+      topics: [
+        { topic: 'Paragraf', count: 10 },
+        { topic: 'Dil Bilgisi', count: 7 },
+      ],
+    },
+    {
+      subject: 'Matematik',
+      topics: [
+        { topic: 'Fonksiyonlar', count: 9 },
+        { topic: 'Polinomlar', count: 3 },
+      ],
+    },
+  ],
+  3: [
+    {
+      subject: 'Sosyal Bilgiler',
+      topics: [
+        { topic: 'Tarih', count: 4 },
+        { topic: 'Coğrafya', count: 6 },
+      ],
+    },
+  ],
+  4: [],
+  5: [
+    {
+      subject: 'Matematik',
+      topics: [
+        { topic: 'Geometri', count: 8 },
+        { topic: 'Üslü Sayılar', count: 6 },
+      ],
+    },
+  ],
+  6: [
+    {
+      subject: 'Fen Bilimleri',
+      topics: [
+        { topic: 'Kimyasal Tepkimeler', count: 11 },
+        { topic: 'Hücre', count: 5 },
+      ],
+    },
+  ],
+  7: [
+    {
+      subject: 'Türkçe',
+      topics: [
+        { topic: 'Okuduğunu Anlama', count: 7 },
+        { topic: 'Yazım Kuralları', count: 4 },
+      ],
+    },
+  ],
+  8: [
+    {
+      subject: 'Matematik',
+      topics: [
+        { topic: 'Olasılık', count: 5 },
+        { topic: 'İstatistik', count: 6 },
+      ],
+    },
+  ],
+  9: [
+    {
+      subject: 'Matematik',
+      topics: [
+        { topic: 'Trigonometri', count: 9 },
+        { topic: 'Türev', count: 7 },
+      ],
+    },
+    {
+      subject: 'Fizik',
+      topics: [
+        { topic: 'Dalgalar', count: 4 },
+        { topic: 'Optik', count: 6 },
+      ],
+    },
+  ],
+  10: [
+    {
+      subject: 'Matematik',
+      topics: [
+        { topic: 'Integral', count: 8 },
+        { topic: 'Limit', count: 6 },
+      ],
+    },
+  ],
+}
+
 const MOCK_STUDENTS = [
   { id: 1, firstName: 'Ahmet', lastName: 'Yılmaz', school: 'Gazi Anadolu Lisesi', grade: '10. Sınıf' },
   { id: 2, firstName: 'Fatma', lastName: 'Kaya', school: 'Atatürk Fen Lisesi', grade: '11. Sınıf' },
@@ -158,7 +265,11 @@ function StudentsPage() {
   }
 
   const handleStudentClick = (student) => {
-    setSelectedStudent({ ...student, ...MOCK_STUDENT_DETAILS[student.id] })
+    setSelectedStudent({
+      ...student,
+      ...MOCK_STUDENT_DETAILS[student.id],
+      questionAnalytics: MOCK_QUESTION_ANALYTICS[student.id] ?? [],
+    })
   }
 
   const handleCloseModal = () => {
@@ -423,6 +534,38 @@ function StudentsPage() {
                   </span>
                 </div>
               </div>
+            </div>
+
+            <div className="students-modal-analysis">
+              <h3 className="students-modal-analysis-title">Soru Kütüphanesi Analizi</h3>
+
+              {selectedStudent.questionAnalytics?.length ? (
+                <div className="students-modal-analysis-cards">
+                  {selectedStudent.questionAnalytics.map((subjectBlock) => {
+                    const totalQuestions = (subjectBlock.topics ?? []).reduce((sum, t) => sum + (t.count ?? 0), 0)
+                    return (
+                      <div key={subjectBlock.subject} className="students-modal-analysis-card">
+                        <div className="students-modal-analysis-card__header">
+                          <div className="students-modal-analysis-card__subject">{subjectBlock.subject}</div>
+                          <div className="students-modal-analysis-card__total">{totalQuestions} soru</div>
+                        </div>
+                        <div className="students-modal-analysis-topics" role="list">
+                          {(subjectBlock.topics ?? []).map((topicItem) => (
+                            <div key={topicItem.topic} className="students-modal-analysis-topic" role="listitem">
+                              <div className="students-modal-analysis-topic__name">{topicItem.topic}</div>
+                              <div className="students-modal-analysis-topic__count">{topicItem.count}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="students-modal-analysis-empty">
+                  Bu öğrenci henüz soru kütüphanesine soru eklememiş.
+                </div>
+              )}
             </div>
           </div>
         </div>

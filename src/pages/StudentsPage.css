@@ -687,6 +687,103 @@
   color: var(--color-danger);
 }
 
+/* ==================== STUDENT ANALYSIS (QUESTION BANK) ==================== */
+
+.students-modal-analysis {
+  margin-top: var(--spacing-8);
+}
+
+.students-modal-analysis-title {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.students-modal-analysis-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+}
+
+@media (min-width: 768px) {
+  .students-modal-analysis-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.students-modal-analysis-card {
+  background-color: var(--bg-primary);
+  border: var(--border-width-thin) solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.students-modal-analysis-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+}
+
+.students-modal-analysis-card__subject {
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.students-modal-analysis-card__total {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-dark);
+  background-color: var(--color-primary-lightest);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-1) var(--spacing-3);
+  white-space: nowrap;
+}
+
+.students-modal-analysis-topics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.students-modal-analysis-topic {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-default);
+  background-color: var(--bg-tertiary);
+}
+
+.students-modal-analysis-topic__name {
+  font-size: var(--font-size-body-sm);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.students-modal-analysis-topic__count {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  min-width: 32px;
+  text-align: right;
+}
+
+.students-modal-analysis-empty {
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+}
+
 @keyframes students-modal-fade-in {
   from {
     opacity: 0;
