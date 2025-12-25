@@ -1,0 +1,531 @@
+/* ==================== HOMEWORK & ANNOUNCEMENTS PAGE ==================== */
+
+.homework-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  position: relative;
+}
+
+.homework-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-8);
+}
+
+.homework-header__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.homework-title {
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.homework-subtitle {
+  font-size: var(--font-size-body);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: var(--line-height-normal);
+}
+
+/* Header action button (matches StudentsPage "Grup Oluştur") */
+.homework-add-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-5);
+  background-color: var(--color-primary);
+  color: var(--text-on-primary);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast) var(--ease-default);
+  margin-left: var(--spacing-4);
+  flex-shrink: 0;
+}
+
+.homework-add-btn:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-primary);
+  transform: translateY(-1px);
+}
+
+.homework-add-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-none);
+}
+
+.homework-add-btn__icon {
+  font-size: var(--icon-lg);
+}
+
+/* Tabs */
+.homework-tabs {
+  display: flex;
+  gap: var(--spacing-6);
+  border-bottom: var(--border-width-thin) solid var(--border-light);
+}
+
+.homework-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: var(--spacing-3) 0;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all var(--transition-fast) var(--ease-default);
+}
+
+.homework-tab:hover {
+  color: var(--text-primary);
+}
+
+.homework-tab--active {
+  color: var(--color-primary-dark);
+  border-bottom-color: var(--color-primary);
+}
+
+/* List */
+.homework-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.homework-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  background-color: var(--bg-primary);
+  border: var(--border-width-thin) solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast) var(--ease-default);
+}
+
+.homework-card--clickable {
+  cursor: pointer;
+}
+
+.homework-card--clickable:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.homework-card--clickable:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.homework-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-primary-lighter);
+  color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.homework-card__icon .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.homework-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.homework-card__title {
+  font-size: var(--font-size-body-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.homework-card__meta {
+  font-size: var(--font-size-body-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.homework-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+.homework-action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast) var(--ease-default);
+}
+
+.homework-action-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--color-primary-dark);
+}
+
+.homework-action-btn--danger:hover {
+  color: var(--color-danger);
+}
+
+/* View icon (info tone) */
+.homework-action-btn--view:hover {
+  color: var(--color-info);
+}
+
+/* ==================== DETAIL MODAL ==================== */
+
+.homework-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--spacing-4);
+  animation: homework-modal-fade-in var(--transition-default) ease-out;
+}
+
+.homework-modal-content {
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-10);
+  position: relative;
+  animation: homework-modal-slide-in var(--transition-default) ease-out;
+}
+
+.homework-modal-close {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast) var(--ease-default);
+}
+
+.homework-modal-close:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.homework-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-8);
+}
+
+.homework-modal-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-primary-lighter);
+  color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.homework-modal-badge .material-symbols-outlined {
+  font-size: 26px;
+}
+
+.homework-modal-header__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.homework-modal-type {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-tertiary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.homework-modal-title {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.homework-modal-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-8);
+}
+
+@media (min-width: 768px) {
+  .homework-modal-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-6);
+  }
+}
+
+.homework-modal-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.homework-modal-info-label {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.homework-modal-info-value {
+  font-size: var(--font-size-body);
+  color: var(--text-secondary);
+}
+
+.homework-modal-section {
+  margin-bottom: var(--spacing-8);
+}
+
+.homework-modal-section__title {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.homework-modal-description {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.homework-modal-files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.homework-modal-file {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background-color: var(--bg-primary);
+  border: var(--border-width-thin) solid var(--border-light);
+  border-radius: var(--radius-default);
+  transition: background-color var(--transition-fast) var(--ease-default);
+}
+
+.homework-modal-file:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.homework-modal-file__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-lighter);
+  color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.homework-modal-file__icon .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.homework-modal-file__name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.homework-modal-file__action {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast) var(--ease-default);
+  flex-shrink: 0;
+}
+
+.homework-modal-file__action:hover {
+  background-color: var(--bg-primary);
+  color: var(--color-primary-dark);
+}
+
+.homework-modal-files__empty {
+  font-size: var(--font-size-body-sm);
+  color: var(--text-tertiary);
+  padding: var(--spacing-3) 0;
+}
+
+.homework-modal-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-6);
+}
+
+.homework-modal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-5);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast) var(--ease-default);
+}
+
+.homework-modal-btn--secondary {
+  background-color: transparent;
+  color: var(--color-primary-dark);
+  border: var(--border-width-medium) solid var(--color-primary);
+}
+
+.homework-modal-btn--secondary:hover {
+  background-color: var(--color-primary-lightest);
+  border-color: var(--color-primary-dark);
+}
+
+.homework-modal-btn--danger {
+  background-color: var(--color-danger);
+  color: var(--text-on-primary);
+}
+
+.homework-modal-btn--danger:hover {
+  box-shadow: var(--shadow-danger);
+}
+
+@keyframes homework-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes homework-modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .homework-title {
+    font-size: var(--font-size-h1);
+  }
+
+  .homework-header {
+    flex-direction: column;
+  }
+
+  .homework-add-btn {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+  }
+
+  .homework-card {
+    align-items: flex-start;
+  }
+
+  .homework-card__meta {
+    white-space: normal;
+  }
+
+  .homework-modal-content {
+    padding: var(--spacing-8);
+  }
+
+  .homework-modal-actions {
+    flex-direction: column;
+  }
+
+  .homework-modal-btn {
+    width: 100%;
+  }
+}
+
+

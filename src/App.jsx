@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import TeacherDashboard from './pages/TeacherDashboard'
 import StudentsPage from './pages/StudentsPage'
 import SchedulePage from './pages/SchedulePage'
+import HomeworkAnnouncementsPage from './pages/HomeworkAnnouncementsPage'
 import { isAuthenticated } from './utils/auth'
 import { ModalStackProvider, useModalStack } from './context/ModalStackContext'
 import './App.css'
@@ -38,6 +39,7 @@ function App() {
             <Route path="/dashboard" element={authed ? <TeacherDashboard /> : <Navigate to="/login" replace />} />
             <Route path="/students" element={authed ? <StudentsPage /> : <Navigate to="/login" replace />} />
             <Route path="/schedule" element={authed ? <SchedulePage /> : <Navigate to="/login" replace />} />
+            <Route path="/homework" element={authed ? <HomeworkAnnouncementsPage /> : <Navigate to="/login" replace />} />
             <Route path="/" element={<Navigate to={authed ? '/dashboard' : '/login'} replace />} />
           </Routes>
         </BrowserRouter>

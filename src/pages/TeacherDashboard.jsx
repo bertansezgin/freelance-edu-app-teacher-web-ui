@@ -30,6 +30,9 @@ function TeacherDashboard() {
       case 'students':
         navigate('/students')
         break
+      case 'homework':
+        navigate('/homework')
+        break
       default:
         // TODO: ilgili sayfalara yönlendirme veya modal açma
         // eslint-disable-next-line no-console

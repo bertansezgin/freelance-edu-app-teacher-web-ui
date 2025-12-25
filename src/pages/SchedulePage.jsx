@@ -131,6 +131,8 @@ function SchedulePage() {
   const [showLessonModal, setShowLessonModal] = useState(false)
   const [lessonModalMode, setLessonModalMode] = useState('add') // add | edit
   const [editingSeriesId, setEditingSeriesId] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null) // lesson object
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [lessons, setLessons] = useState(MOCK_LESSONS)
   const [scheduleView, setScheduleView] = useState('week') // week | month | quarter
   // TODO(backend): Replace this with "today" coming from backend (server time / user's timezone decision).
@@ -228,8 +230,7 @@ function SchedulePage() {
         navigate('/schedule')
         break
       case 'homework':
-        // TODO: Ödev & duyurular sayfasına yönlendirme
-        console.log('Navigate to homework')
+        navigate('/homework')
         break
       case 'approvals':
         // TODO: İstek onaylama sayfasına yönlendirme
@@ -301,10 +302,40 @@ function SchedulePage() {
     setShowLessonModal(true)
   }
 
+  const handleOpenDeleteModal = (lesson) => {
+    setDeleteTarget(lesson)
+    setShowDeleteModal(true)
+  }
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false)
+    setDeleteTarget(null)
+  }
+
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return
+
+    const targetSeriesId = deleteTarget.seriesId ?? deleteTarget.id
+    const seriesCount = lessons.filter((l) => l.seriesId === targetSeriesId).length
+
+    setLessons((prev) => {
+      if (seriesCount > 1) return prev.filter((l) => l.seriesId !== targetSeriesId)
+      return prev.filter((l) => l.id !== deleteTarget.id)
+    })
+
+    setShowDeleteModal(false)
+    setDeleteTarget(null)
+  }
+
   useEffect(() => {
     if (!showLessonModal) return undefined
     return registerModal('schedule-lesson-modal', handleCloseModal)
   }, [showLessonModal, registerModal])
+
+  useEffect(() => {
+    if (!showDeleteModal) return undefined
+    return registerModal('schedule-delete-confirm', handleCloseDeleteModal)
+  }, [showDeleteModal, registerModal])
 
   const handleToggleStudent = (studentName) => {
     setLessonForm((prev) => {
@@ -370,15 +401,26 @@ function SchedulePage() {
             <p className="schedule-lesson-title">{lesson.subject}</p>
             <p className="schedule-lesson-class">Sınıf / Grup: {lesson.className}</p>
           </div>
-          <button
-            type="button"
-            className="schedule-lesson-edit"
-            onClick={() => handleEditLesson(lesson)}
-            aria-label={`${lesson.subject} dersini düzenle`}
-            title="Dersi düzenle"
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">edit</span>
-          </button>
+          <div className="schedule-lesson-actions">
+            <button
+              type="button"
+              className="schedule-lesson-edit"
+              onClick={() => handleEditLesson(lesson)}
+              aria-label={`${lesson.subject} dersini düzenle`}
+              title="Dersi düzenle"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">edit</span>
+            </button>
+            <button
+              type="button"
+              className="schedule-lesson-delete"
+              onClick={() => handleOpenDeleteModal(lesson)}
+              aria-label={`${lesson.subject} dersini sil`}
+              title="Dersi sil"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">delete</span>
+            </button>
+          </div>
         </div>
         <p className="schedule-lesson-time">
           {lesson.startTime} - {lesson.endTime}
@@ -807,6 +849,44 @@ function SchedulePage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && deleteTarget && (
+        <div className="schedule-confirm-overlay" onClick={handleCloseDeleteModal}>
+          <div className="schedule-confirm-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="schedule-confirm-close"
+              onClick={handleCloseDeleteModal}
+              aria-label="Modali kapat"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+
+            <h2 className="schedule-confirm-title">Dersi Sil</h2>
+            <p className="schedule-confirm-text">
+              <strong>{deleteTarget.subject}</strong> dersini silmek istediğinize emin misiniz?
+            </p>
+
+            {(() => {
+              return (
+                <div className="schedule-confirm-warning">
+                  Eğer bu dersi önceden <strong>1 aylık</strong> ya da <strong>3 aylık</strong> olarak eklediyseniz bunlar da silinecektir.
+                  Onaylıyor musunuz?
+                </div>
+              )
+            })()}
+
+            <div className="schedule-confirm-actions">
+              <button type="button" className="schedule-confirm-btn schedule-confirm-btn--secondary" onClick={handleCloseDeleteModal}>
+                İptal
+              </button>
+              <button type="button" className="schedule-confirm-btn schedule-confirm-btn--danger" onClick={handleConfirmDelete}>
+                Sil
+              </button>
+            </div>
           </div>
         </div>
       )}

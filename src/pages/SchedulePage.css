@@ -486,6 +486,153 @@
   flex-shrink: 0;
 }
 
+.schedule-lesson-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+}
+
+.schedule-lesson-delete {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  background-color: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast) var(--ease-default);
+  flex-shrink: 0;
+}
+
+.schedule-lesson-delete:hover {
+  background-color: rgba(255, 112, 112, 0.12);
+  color: var(--color-danger);
+}
+
+.schedule-lesson-delete:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Delete Confirmation Modal */
+.schedule-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--spacing-4);
+  animation: fadeIn var(--transition-fast) ease-out;
+}
+
+.schedule-confirm-content {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-8);
+  position: relative;
+  animation: slideUp var(--transition-default) ease-out;
+}
+
+.schedule-confirm-close {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  border: var(--border-width-thin) solid var(--border-light);
+  background-color: var(--bg-primary);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast) var(--ease-default);
+}
+
+.schedule-confirm-close:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.schedule-confirm-close:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.schedule-confirm-title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.schedule-confirm-text {
+  font-size: var(--font-size-body);
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-4) 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.schedule-confirm-warning {
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  background-color: rgba(245, 158, 11, 0.12);
+  color: var(--text-primary);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-normal);
+}
+
+.schedule-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-8);
+}
+
+.schedule-confirm-btn {
+  padding: var(--spacing-3) var(--spacing-5);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast) var(--ease-default);
+  border: none;
+}
+
+.schedule-confirm-btn--secondary {
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  border: var(--border-width-thin) solid var(--border-light);
+}
+
+.schedule-confirm-btn--secondary:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.schedule-confirm-btn--danger {
+  background-color: var(--color-danger);
+  color: var(--text-on-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.schedule-confirm-btn--danger:hover {
+  box-shadow: var(--shadow-danger);
+  filter: brightness(0.98);
+}
+
 .schedule-lesson-edit:hover {
   background-color: var(--bg-primary);
   color: var(--text-primary);

@@ -125,8 +125,7 @@ function StudentsPage() {
         navigate('/schedule')
         break
       case 'homework':
-        // TODO: Ödev & duyurular sayfasına yönlendirme
-        console.log('Navigate to homework')
+        navigate('/homework')
         break
       case 'approvals':
         // TODO: İstek onaylama sayfasına yönlendirme

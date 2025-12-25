@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { setAuthenticated } from '../utils/auth'
+import { useModalStack } from '../context/ModalStackContext'
 import '../styles/common.css'
 import './HomeworkAnnouncementsPage.css'
 
@@ -10,12 +11,21 @@ const MOCK_HOMEWORKS = [
     title: 'Matematik Ödevi - Cebirsel İfadeler',
     className: '8-A',
     dueDate: '25.12.2024',
+    description:
+      'Cebirsel ifadeler konusundaki 1-20 arası soruları çözün. Çözümleri defterinize yazarak, gerekli adımları gösterin.',
+    attachments: [
+      { id: 'hw-1-a', type: 'pdf', name: 'Cebirsel_Ifadeler_Soru_Föyü.pdf' },
+      { id: 'hw-1-b', type: 'doc', name: 'Çözüm_Kuralları.docx' },
+    ],
   },
   {
     id: 2,
     title: 'Fen Bilimleri Projesi',
     className: '7-C',
     dueDate: '15.01.2025',
+    description:
+      'Güneş sistemi maketi hazırlayın. Kullanılan malzemeleri ve kısa açıklamayı projenize eklemeyi unutmayın.',
+    attachments: [{ id: 'hw-2-a', type: 'pdf', name: 'Proje_Kılavuzu.pdf' }],
   },
 ]
 
@@ -25,22 +35,40 @@ const MOCK_ANNOUNCEMENTS = [
     title: 'Veli Toplantısı Hatırlatması',
     className: 'Tüm Sınıflar',
     date: '20.12.2024',
+    description:
+      'Veli toplantısı 20 Aralık Cuma günü saat 18:00’de okul konferans salonunda yapılacaktır. Katılımınız önemlidir.',
+    attachments: [{ id: 'an-1-a', type: 'pdf', name: 'Veli_Toplantısı_Bilgilendirme.pdf' }],
   },
   {
     id: 2,
     title: 'Deneme Sınavı Programı Yayınlandı',
     className: '8-A',
     date: '23.12.2024',
+    description:
+      'Deneme sınavı programı yayınlanmıştır. Sınav saatleri ve salon bilgileri için ek dosyayı inceleyebilirsiniz.',
+    attachments: [{ id: 'an-2-a', type: 'xls', name: 'Deneme_Sınavı_Programı.xlsx' }],
   },
 ]
 
+const FILE_ICON_BY_TYPE = {
+  pdf: 'picture_as_pdf',
+  doc: 'description',
+  xls: 'grid_on',
+  ppt: 'slideshow',
+}
+
 function HomeworkAnnouncementsPage() {
   const navigate = useNavigate()
+  const { registerModal } = useModalStack()
   const [activeTab, setActiveTab] = useState('homeworks') // homeworks | announcements
+  const [selectedItem, setSelectedItem] = useState(null) // { ...item, itemType: 'homeworks' | 'announcements' }
 
   const items = useMemo(() => {
     return activeTab === 'homeworks' ? MOCK_HOMEWORKS : MOCK_ANNOUNCEMENTS
   }, [activeTab])
+
+  const addButtonLabel = activeTab === 'homeworks' ? 'Ödev Ekle' : 'Duyuru Ekle'
+  const detailTypeLabel = selectedItem?.itemType === 'homeworks' ? 'Ödev' : 'Duyuru'
 
   const handleLogout = () => {
     setAuthenticated(false)
@@ -91,15 +119,28 @@ function HomeworkAnnouncementsPage() {
     console.log('Add', activeTab)
   }
 
-  const handleEdit = (id) => {
+  const handleEdit = (itemType, id) => {
     // TODO: Düzenleme modalı
-    console.log('Edit', activeTab, id)
+    console.log('Edit', itemType, id)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = (itemType, id) => {
     // TODO: Silme işlemi
-    console.log('Delete', activeTab, id)
+    console.log('Delete', itemType, id)
   }
+
+  const handleOpenDetail = (item) => {
+    setSelectedItem({ ...item, itemType: activeTab })
+  }
+
+  const handleCloseDetail = () => {
+    setSelectedItem(null)
+  }
+
+  useEffect(() => {
+    if (!selectedItem) return undefined
+    return registerModal('homework-detail', handleCloseDetail)
+  }, [selectedItem, registerModal])
 
   return (
     <div className="layout-shell">
@@ -191,8 +232,17 @@ function HomeworkAnnouncementsPage() {
       <main className="layout-main">
         <div className="homework-page">
           <header className="homework-header">
-            <h1 className="homework-title">Ödev &amp; Duyurular</h1>
-            <p className="homework-subtitle">Sınıflarınız için ödevleri ve duyuruları buradan yönetin.</p>
+            <div className="homework-header__content">
+              <h1 className="homework-title">Ödev &amp; Duyurular</h1>
+              <p className="homework-subtitle">Sınıflarınız için ödevleri ve duyuruları buradan yönetin.</p>
+            </div>
+
+            <button type="button" className="homework-add-btn" onClick={handleAdd}>
+              <span className="material-symbols-outlined homework-add-btn__icon" aria-hidden="true">
+                add
+              </span>
+              <span>{addButtonLabel}</span>
+            </button>
           </header>
 
           <div className="homework-tabs" role="tablist" aria-label="Ödev ve duyuru sekmeleri">
@@ -218,7 +268,16 @@ function HomeworkAnnouncementsPage() {
 
           <div className="homework-list" role="list">
             {items.map((item) => (
-              <div key={item.id} className="homework-card" role="listitem">
+              <div
+                key={item.id}
+                className="homework-card homework-card--clickable"
+                role="listitem"
+                tabIndex={0}
+                onClick={() => handleOpenDetail(item)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') handleOpenDetail(item)
+                }}
+              >
                 <div className="homework-card__icon" aria-hidden="true">
                   <span className="material-symbols-outlined">assignment</span>
                 </div>
@@ -233,8 +292,23 @@ function HomeworkAnnouncementsPage() {
                 <div className="homework-card__actions">
                   <button
                     type="button"
+                    className="homework-action-btn homework-action-btn--view"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleOpenDetail(item)
+                    }}
+                    aria-label="Detayı görüntüle"
+                    title="Detayı görüntüle"
+                  >
+                    <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
+                  </button>
+                  <button
+                    type="button"
                     className="homework-action-btn"
-                    onClick={() => handleEdit(item.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleEdit(activeTab, item.id)
+                    }}
                     aria-label="Düzenle"
                     title="Düzenle"
                   >
@@ -243,7 +317,10 @@ function HomeworkAnnouncementsPage() {
                   <button
                     type="button"
                     className="homework-action-btn homework-action-btn--danger"
-                    onClick={() => handleDelete(item.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDelete(activeTab, item.id)
+                    }}
                     aria-label="Sil"
                     title="Sil"
                   >
@@ -253,12 +330,93 @@ function HomeworkAnnouncementsPage() {
               </div>
             ))}
           </div>
-
-          <button type="button" className="homework-fab" onClick={handleAdd} aria-label="Ekle" title="Ekle">
-            <span className="material-symbols-outlined" aria-hidden="true">add</span>
-          </button>
         </div>
       </main>
+
+      {selectedItem && (
+        <div className="homework-modal-overlay" onClick={handleCloseDetail} role="dialog" aria-modal="true">
+          <div className="homework-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="homework-modal-close" onClick={handleCloseDetail} aria-label="Modali kapat">
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+
+            <div className="homework-modal-header">
+              <div className="homework-modal-badge" aria-hidden="true">
+                <span className="material-symbols-outlined">{selectedItem.itemType === 'homeworks' ? 'assignment' : 'campaign'}</span>
+              </div>
+              <div className="homework-modal-header__text">
+                <div className="homework-modal-type">{detailTypeLabel}</div>
+                <h2 className="homework-modal-title">{selectedItem.title}</h2>
+              </div>
+            </div>
+
+            <div className="homework-modal-info-grid">
+              <div className="homework-modal-info-item">
+                <div className="homework-modal-info-label">Sınıf / Grup</div>
+                <div className="homework-modal-info-value">{selectedItem.className}</div>
+              </div>
+              <div className="homework-modal-info-item">
+                <div className="homework-modal-info-label">{selectedItem.itemType === 'homeworks' ? 'Son Teslim' : 'Tarih'}</div>
+                <div className="homework-modal-info-value">
+                  {selectedItem.itemType === 'homeworks' ? selectedItem.dueDate : selectedItem.date}
+                </div>
+              </div>
+            </div>
+
+            <div className="homework-modal-section">
+              <div className="homework-modal-section__title">Açıklama</div>
+              <p className="homework-modal-description">{selectedItem.description}</p>
+            </div>
+
+            <div className="homework-modal-section">
+              <div className="homework-modal-section__title">Ek Dosyalar</div>
+              <div className="homework-modal-files" role="list">
+                {(selectedItem.attachments ?? []).map((file) => (
+                  <div key={file.id} className="homework-modal-file" role="listitem">
+                    <div className="homework-modal-file__icon" aria-hidden="true">
+                      <span className="material-symbols-outlined">{FILE_ICON_BY_TYPE[file.type] ?? 'attach_file'}</span>
+                    </div>
+                    <div className="homework-modal-file__name">{file.name}</div>
+                    <button
+                      type="button"
+                      className="homework-modal-file__action"
+                      onClick={() => console.log('Download file:', file)}
+                      aria-label="Dosyayı indir"
+                      title="Dosyayı indir"
+                    >
+                      <span className="material-symbols-outlined" aria-hidden="true">download</span>
+                    </button>
+                  </div>
+                ))}
+
+                {(selectedItem.attachments ?? []).length === 0 && (
+                  <div className="homework-modal-files__empty">Bu öğe için ek dosya yok.</div>
+                )}
+              </div>
+            </div>
+
+            <div className="homework-modal-actions">
+              <button type="button" className="homework-modal-btn homework-modal-btn--secondary" onClick={handleCloseDetail}>
+                Kapat
+              </button>
+              <button
+                type="button"
+                className="homework-modal-btn homework-modal-btn--secondary"
+                onClick={() => handleEdit(selectedItem.itemType, selectedItem.id)}
+              >
+                Düzenle
+              </button>
+              <button
+                type="button"
+                className="homework-modal-btn homework-modal-btn--danger"
+                onClick={() => handleDelete(selectedItem.itemType, selectedItem.id)}
+              >
+                Sil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
