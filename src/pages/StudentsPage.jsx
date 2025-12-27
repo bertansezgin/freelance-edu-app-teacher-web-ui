@@ -236,6 +236,15 @@ function StudentsPage() {
       case 'home':
         navigate('/dashboard')
         break
+      case 'students':
+        navigate('/students')
+        break
+      case 'studentAnalytics':
+        navigate('/student-analytics')
+        break
+      case 'materials':
+        navigate('/materials')
+        break
       case 'schedule':
         navigate('/schedule')
         break
@@ -376,6 +385,20 @@ function StudentsPage() {
               groups
             </span>
             <span className="sidebar-link__text">Öğrencilerim</span>
+          </button>
+
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('studentAnalytics')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              bar_chart
+            </span>
+            <span className="sidebar-link__text">Öğrenci Analizi</span>
+          </button>
+
+          <button type="button" className="sidebar-link" onClick={() => handleNavigation('materials')}>
+            <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
+              folder_open
+            </span>
+            <span className="sidebar-link__text">Ders Materyallerim</span>
           </button>
 
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('schedule')}>

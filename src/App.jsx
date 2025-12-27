@@ -4,6 +4,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import TeacherDashboard from './pages/TeacherDashboard'
 import StudentsPage from './pages/StudentsPage'
+import StudentAnalyticsPage from './pages/StudentAnalyticsPage'
+import MaterialsPage from './pages/MaterialsPage'
 import SchedulePage from './pages/SchedulePage'
 import HomeworkAnnouncementsPage from './pages/HomeworkAnnouncementsPage'
 import ApprovalsPage from './pages/ApprovalsPage'
@@ -43,6 +45,8 @@ function App() {
         <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={authed ? <TeacherDashboard /> : <Navigate to="/login" replace />} />
             <Route path="/students" element={authed ? <StudentsPage /> : <Navigate to="/login" replace />} />
+            <Route path="/student-analytics" element={authed ? <StudentAnalyticsPage /> : <Navigate to="/login" replace />} />
+            <Route path="/materials" element={authed ? <MaterialsPage /> : <Navigate to="/login" replace />} />
             <Route path="/schedule" element={authed ? <SchedulePage /> : <Navigate to="/login" replace />} />
             <Route path="/homework" element={authed ? <HomeworkAnnouncementsPage /> : <Navigate to="/login" replace />} />
             <Route path="/approvals" element={authed ? <ApprovalsPage /> : <Navigate to="/login" replace />} />
