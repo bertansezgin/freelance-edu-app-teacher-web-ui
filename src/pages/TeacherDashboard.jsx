@@ -42,6 +42,12 @@ function TeacherDashboard() {
       case 'profile':
         navigate('/profile')
         break
+      case 'groups':
+        navigate('/groups')
+        break
+      case 'questionBank':
+        navigate('/question-bank')
+        break
       default:
         // TODO: ilgili sayfalara yönlendirme veya modal açma
         // eslint-disable-next-line no-console
@@ -107,7 +113,7 @@ function TeacherDashboard() {
 
           <button type="button" className="sidebar-link" onClick={() => handleQuickAction('questionBank')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              quiz
+              folder
             </span>
             <span className="sidebar-link__text">Soru Bankası</span>
           </button>

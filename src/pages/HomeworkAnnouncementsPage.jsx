@@ -184,12 +184,10 @@ function HomeworkAnnouncementsPage() {
         navigate('/approvals')
         break
       case 'questionBank':
-        // TODO: Soru bankası sayfasına yönlendirme
-        console.log('Navigate to question bank')
+        navigate('/question-bank')
         break
       case 'groups':
-        // TODO: Gruplar sayfasına yönlendirme
-        console.log('Navigate to groups')
+        navigate('/groups')
         break
       case 'profile':
         navigate('/profile')
@@ -589,7 +587,7 @@ function HomeworkAnnouncementsPage() {
 
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('questionBank')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              quiz
+              folder
             </span>
             <span className="sidebar-link__text">Soru Bankası</span>
           </button>

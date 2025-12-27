@@ -4,6 +4,7 @@ import { setAuthenticated } from '../utils/auth'
 import { useModalStack } from '../context/ModalStackContext'
 import '../styles/common.css'
 import './StudentsPage.css'
+import './GroupsPage.css'
 
 const MOCK_STUDENT_DETAILS = {
   1: {
@@ -194,6 +195,13 @@ function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGrade, setSelectedGrade] = useState('Tüm Sınıflar')
   const [selectedStudent, setSelectedStudent] = useState(null)
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false)
+  const [groupForm, setGroupForm] = useState({
+    name: '',
+    description: '',
+    selectedStudents: [],
+    studentQuery: '',
+  })
 
   const grades = ['Tüm Sınıflar', '9. Sınıf', '10. Sınıf', '11. Sınıf', '12. Sınıf', 'Mezun']
 
@@ -238,12 +246,10 @@ function StudentsPage() {
         navigate('/approvals')
         break
       case 'questionBank':
-        // TODO: Soru bankası sayfasına yönlendirme
-        console.log('Navigate to question bank')
+        navigate('/question-bank')
         break
       case 'groups':
-        // TODO: Gruplar sayfasına yönlendirme
-        console.log('Navigate to groups')
+        navigate('/groups')
         break
       case 'profile':
         navigate('/profile')
@@ -257,8 +263,63 @@ function StudentsPage() {
   }
 
   const handleCreateGroup = () => {
-    // TODO: Grup oluşturma modalı veya sayfası
-    console.log('Create group')
+    setGroupForm({
+      name: '',
+      description: '',
+      selectedStudents: [],
+      studentQuery: '',
+    })
+    setShowCreateGroupModal(true)
+  }
+
+  const handleCloseCreateGroupModal = () => {
+    setShowCreateGroupModal(false)
+    setGroupForm({
+      name: '',
+      description: '',
+      selectedStudents: [],
+      studentQuery: '',
+    })
+  }
+
+  const filteredGroupStudents = useMemo(() => {
+    const query = groupForm.studentQuery.trim().toLowerCase()
+    if (!query) return MOCK_STUDENTS
+    return MOCK_STUDENTS.filter((student) => {
+      const fullName = `${student.firstName} ${student.lastName}`.toLowerCase()
+      return fullName.includes(query) || student.school.toLowerCase().includes(query)
+    })
+  }, [groupForm.studentQuery])
+
+  const handleToggleGroupStudent = (studentId) => {
+    setGroupForm((prev) => {
+      const exists = prev.selectedStudents.includes(studentId)
+      return {
+        ...prev,
+        selectedStudents: exists
+          ? prev.selectedStudents.filter((id) => id !== studentId)
+          : [...prev.selectedStudents, studentId],
+      }
+    })
+  }
+
+  const handleSubmitGroup = (e) => {
+    e.preventDefault()
+
+    if (!groupForm.name.trim()) {
+      alert('Grup adı gereklidir!')
+      return
+    }
+
+    // TODO(backend): Create group API call
+    console.log('Create group:', {
+      name: groupForm.name.trim(),
+      description: groupForm.description.trim(),
+      studentIds: groupForm.selectedStudents,
+    })
+
+    alert('Grup başarıyla oluşturuldu!')
+    handleCloseCreateGroupModal()
   }
 
   const handleStudentClick = (student) => {
@@ -277,6 +338,11 @@ function StudentsPage() {
     if (!selectedStudent) return undefined
     return registerModal('students-detail', handleCloseModal)
   }, [selectedStudent, registerModal])
+
+  useEffect(() => {
+    if (!showCreateGroupModal) return undefined
+    return registerModal('students-create-group-modal', handleCloseCreateGroupModal)
+  }, [showCreateGroupModal, registerModal])
 
   const handleDeleteStudent = (studentId, event) => {
     event.stopPropagation() // Satır tıklama olayını engelle
@@ -335,7 +401,7 @@ function StudentsPage() {
 
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('questionBank')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              quiz
+              folder
             </span>
             <span className="sidebar-link__text">Soru Bankası</span>
           </button>
@@ -565,6 +631,95 @@ function StudentsPage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Group Modal */}
+      {showCreateGroupModal && (
+        <div className="groups-modal-overlay" onClick={handleCloseCreateGroupModal}>
+          <div className="groups-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3 className="groups-modal-title">Yeni Grup Oluştur</h3>
+            <form onSubmit={handleSubmitGroup} className="groups-modal-form">
+              <div className="groups-modal-field">
+                <label htmlFor="group-name-students" className="groups-modal-label">
+                  Grup Adı
+                </label>
+                <input
+                  id="group-name-students"
+                  type="text"
+                  className="groups-modal-input"
+                  placeholder="Grup Adı"
+                  value={groupForm.name}
+                  onChange={(e) => setGroupForm((prev) => ({ ...prev, name: e.target.value }))}
+                  required
+                />
+              </div>
+
+              <div className="groups-modal-field">
+                <label htmlFor="group-description-students" className="groups-modal-label">
+                  Açıklama
+                </label>
+                <textarea
+                  id="group-description-students"
+                  className="groups-modal-textarea"
+                  placeholder="Açıklama"
+                  rows={4}
+                  value={groupForm.description}
+                  onChange={(e) => setGroupForm((prev) => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="groups-modal-field">
+                <label htmlFor="group-students-students" className="groups-modal-label">
+                  Öğrenci Seçimi
+                </label>
+                <div className="groups-modal-students-wrapper" id="group-students-students">
+                  <div className="groups-modal-students__search-wrapper">
+                    <span className="material-symbols-outlined groups-modal-students__search-icon" aria-hidden="true">
+                      search
+                    </span>
+                    <input
+                      type="text"
+                      className="groups-modal-students__search-input"
+                      placeholder="Öğrenci ara..."
+                      value={groupForm.studentQuery}
+                      onChange={(e) => setGroupForm((prev) => ({ ...prev, studentQuery: e.target.value }))}
+                    />
+                  </div>
+                  <div className="groups-modal-students__list" role="list">
+                    {filteredGroupStudents.map((student) => {
+                      const checked = groupForm.selectedStudents.includes(student.id)
+                      return (
+                        <label key={student.id} className="groups-modal-students__item" role="listitem">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => handleToggleGroupStudent(student.id)}
+                            className="groups-modal-students__checkbox"
+                          />
+                          <span className="groups-modal-students__name">
+                            {student.firstName} {student.lastName}
+                          </span>
+                        </label>
+                      )
+                    })}
+                    {filteredGroupStudents.length === 0 && (
+                      <div className="groups-modal-students__empty">Öğrenci bulunamadı</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="groups-modal-actions">
+                <button type="button" className="groups-modal-btn groups-modal-btn--cancel" onClick={handleCloseCreateGroupModal}>
+                  İptal
+                </button>
+                <button type="submit" className="groups-modal-btn groups-modal-btn--primary">
+                  Kaydet
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
