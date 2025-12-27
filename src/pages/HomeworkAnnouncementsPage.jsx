@@ -18,13 +18,21 @@ const MOCK_STUDENTS = [
   'Deniz Aksoy',
 ]
 
-const CLASS_GROUP_OPTIONS = ['8-A', '7-C', '8-A Grup 1', '7-C Grup 2', 'Tüm Sınıflar']
+const CLASS_GROUP_OPTIONS = [
+  '7. Sınıf',
+  '8. Sınıf',
+  '9. Sınıf',
+  '10. Sınıf',
+  '7. Sınıf Grup 1',
+  '8. Sınıf Grup 2',
+  'Tüm Sınıflar',
+]
 
 const MOCK_HOMEWORKS = [
   {
     id: 1,
     title: 'Matematik Ödevi - Cebirsel İfadeler',
-    className: '8-A',
+    className: '8. Sınıf',
     dueDate: '25.12.2024',
     description:
       'Cebirsel ifadeler konusundaki 1-20 arası soruları çözün. Çözümleri defterinize yazarak, gerekli adımları gösterin.',
@@ -46,7 +54,7 @@ const MOCK_HOMEWORKS = [
   {
     id: 2,
     title: 'Fen Bilimleri Projesi',
-    className: '7-C',
+    className: '7. Sınıf',
     dueDate: '15.01.2025',
     description:
       'Güneş sistemi maketi hazırlayın. Kullanılan malzemeleri ve kısa açıklamayı projenize eklemeyi unutmayın.',
@@ -73,7 +81,7 @@ const MOCK_ANNOUNCEMENTS = [
   {
     id: 2,
     title: 'Deneme Sınavı Programı Yayınlandı',
-    className: '8-A',
+    className: '8. Sınıf',
     date: '23.12.2024',
     description:
       'Deneme sınavı programı yayınlanmıştır. Sınav saatleri ve salon bilgileri için ek dosyayı inceleyebilirsiniz.',
@@ -173,8 +181,7 @@ function HomeworkAnnouncementsPage() {
         navigate('/homework')
         break
       case 'approvals':
-        // TODO: İstek onaylama sayfasına yönlendirme
-        console.log('Navigate to approvals')
+        navigate('/approvals')
         break
       case 'questionBank':
         // TODO: Soru bankası sayfasına yönlendirme
@@ -185,12 +192,10 @@ function HomeworkAnnouncementsPage() {
         console.log('Navigate to groups')
         break
       case 'profile':
-        // TODO: Profil sayfasına yönlendirme
-        console.log('Navigate to profile')
+        navigate('/profile')
         break
       case 'settings':
-        // TODO: Ayarlar sayfasına yönlendirme
-        console.log('Navigate to settings')
+        navigate('/settings')
         break
       default:
         break
@@ -577,7 +582,7 @@ function HomeworkAnnouncementsPage() {
 
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('approvals')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              task_alt
+              check_circle
             </span>
             <span className="sidebar-link__text">İstek Onaylama</span>
           </button>
@@ -591,7 +596,7 @@ function HomeworkAnnouncementsPage() {
 
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('groups')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              workspaces
+              folder
             </span>
             <span className="sidebar-link__text">Gruplar</span>
           </button>
@@ -602,15 +607,16 @@ function HomeworkAnnouncementsPage() {
             </span>
             <span className="sidebar-link__text">Profil</span>
           </button>
-        </nav>
 
-        <div className="sidebar-footer">
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('settings')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
               settings
             </span>
             <span className="sidebar-link__text">Ayarlar</span>
           </button>
+        </nav>
+
+        <div className="sidebar-footer">
           <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
               logout

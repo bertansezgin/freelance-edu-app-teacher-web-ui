@@ -235,8 +235,7 @@ function StudentsPage() {
         navigate('/homework')
         break
       case 'approvals':
-        // TODO: İstek onaylama sayfasına yönlendirme
-        console.log('Navigate to approvals')
+        navigate('/approvals')
         break
       case 'questionBank':
         // TODO: Soru bankası sayfasına yönlendirme
@@ -247,12 +246,10 @@ function StudentsPage() {
         console.log('Navigate to groups')
         break
       case 'profile':
-        // TODO: Profil sayfasına yönlendirme
-        console.log('Navigate to profile')
+        navigate('/profile')
         break
       case 'settings':
-        // TODO: Ayarlar sayfasına yönlendirme
-        console.log('Navigate to settings')
+        navigate('/settings')
         break
       default:
         break
@@ -324,14 +321,14 @@ function StudentsPage() {
 
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('homework')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              assignment
+              campaign
             </span>
             <span className="sidebar-link__text">Ödevler &amp; Duyurular</span>
           </button>
 
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('approvals')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              task_alt
+              check_circle
             </span>
             <span className="sidebar-link__text">İstek Onaylama</span>
           </button>
@@ -345,7 +342,7 @@ function StudentsPage() {
 
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('groups')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              workspaces
+              folder
             </span>
             <span className="sidebar-link__text">Gruplar</span>
           </button>
@@ -356,15 +353,16 @@ function StudentsPage() {
             </span>
             <span className="sidebar-link__text">Profil</span>
           </button>
-        </nav>
 
-        <div className="sidebar-footer">
           <button type="button" className="sidebar-link" onClick={() => handleNavigation('settings')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
               settings
             </span>
             <span className="sidebar-link__text">Ayarlar</span>
           </button>
+        </nav>
+
+        <div className="sidebar-footer">
           <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
               logout

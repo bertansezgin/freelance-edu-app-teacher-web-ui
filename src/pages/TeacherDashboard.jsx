@@ -33,6 +33,15 @@ function TeacherDashboard() {
       case 'homework':
         navigate('/homework')
         break
+      case 'approvals':
+        navigate('/approvals')
+        break
+      case 'settings':
+        navigate('/settings')
+        break
+      case 'profile':
+        navigate('/profile')
+        break
       default:
         // TODO: ilgili sayfalara yönlendirme veya modal açma
         // eslint-disable-next-line no-console
@@ -84,14 +93,14 @@ function TeacherDashboard() {
 
           <button type="button" className="sidebar-link" onClick={() => handleQuickAction('homework')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              assignment
+              campaign
             </span>
             <span className="sidebar-link__text">Ödevler &amp; Duyurular</span>
           </button>
 
           <button type="button" className="sidebar-link" onClick={() => handleQuickAction('approvals')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              task_alt
+              check_circle
             </span>
             <span className="sidebar-link__text">İstek Onaylama</span>
           </button>
@@ -105,7 +114,7 @@ function TeacherDashboard() {
 
           <button type="button" className="sidebar-link" onClick={() => handleQuickAction('groups')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
-              workspaces
+              folder
             </span>
             <span className="sidebar-link__text">Gruplar</span>
           </button>
@@ -116,15 +125,16 @@ function TeacherDashboard() {
             </span>
             <span className="sidebar-link__text">Profil</span>
           </button>
-        </nav>
 
-        <div className="sidebar-footer">
           <button type="button" className="sidebar-link" onClick={() => handleQuickAction('settings')}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
               settings
             </span>
             <span className="sidebar-link__text">Ayarlar</span>
           </button>
+        </nav>
+
+        <div className="sidebar-footer">
           <button type="button" className="sidebar-link sidebar-link--danger" onClick={handleLogout}>
             <span className="material-symbols-outlined sidebar-link__icon" aria-hidden="true">
               logout
