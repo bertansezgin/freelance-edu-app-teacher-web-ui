@@ -7,39 +7,6 @@ import './SchedulePage.css'
 
 const LESSON_DURATION_MINUTES = 45
 
-const MOCK_LESSONS = [
-  {
-    id: 1,
-    day: 'Pazartesi',
-    subject: 'Matematik',
-    className: '8A',
-    description: 'Yeni konu anlatımı + kısa ödev kontrolü.',
-    startTime: '09:00',
-    endTime: '09:45',
-    participants: ['Elif Kaya', 'Can Demir', 'Zeynep Yılmaz', 'Ahmet Arslan', 'Büşra Çetin', 'Deniz Aksoy']
-  },
-  {
-    id: 2,
-    day: 'Salı',
-    subject: 'Fen Bilimleri',
-    className: '7B',
-    description: 'Deney raporu değerlendirmesi.',
-    startTime: '10:00',
-    endTime: '10:45',
-    participants: ['Mert Savaş', 'Gül Şen', 'Kerem Tunç', 'Ece Yücel']
-  },
-  {
-    id: 3,
-    day: 'Çarşamba',
-    subject: 'Türkçe',
-    className: '6C',
-    description: '',
-    startTime: '13:00',
-    endTime: '13:45',
-    participants: ['Ozan Yıldız', 'Ayşe Deniz', 'Burak Öztürk', 'Selin Polat', 'Kaan Güneş']
-  }
-]
-
 const DAYS_OF_WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma']
 const TURKISH_WEEKDAYS_BY_JS = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi']
 const WEEKDAY_HEADERS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
@@ -86,6 +53,51 @@ function getMondayOfWeek(date) {
   copied.setDate(copied.getDate() - mondayBased)
   copied.setHours(0, 0, 0, 0)
   return copied
+}
+
+function getDateString(date) {
+  return date.toISOString().split('T')[0]
+}
+
+function getInitialMockLessons() {
+  const monday = getMondayOfWeek(new Date())
+  const mondayStr = getDateString(monday)
+  
+  return [
+    {
+      id: 1,
+      day: 'Pazartesi',
+      subject: 'Matematik',
+      className: '8A',
+      description: 'Yeni konu anlatımı + kısa ödev kontrolü.',
+      startTime: '09:00',
+      endTime: '09:45',
+      participants: ['Elif Kaya', 'Can Demir', 'Zeynep Yılmaz', 'Ahmet Arslan', 'Büşra Çetin', 'Deniz Aksoy'],
+      weekStartDate: mondayStr,
+    },
+    {
+      id: 2,
+      day: 'Salı',
+      subject: 'Fen Bilimleri',
+      className: '7B',
+      description: 'Deney raporu değerlendirmesi.',
+      startTime: '10:00',
+      endTime: '10:45',
+      participants: ['Mert Savaş', 'Gül Şen', 'Kerem Tunç', 'Ece Yücel'],
+      weekStartDate: mondayStr,
+    },
+    {
+      id: 3,
+      day: 'Çarşamba',
+      subject: 'Türkçe',
+      className: '6C',
+      description: '',
+      startTime: '13:00',
+      endTime: '13:45',
+      participants: ['Ozan Yıldız', 'Ayşe Deniz', 'Burak Öztürk', 'Selin Polat', 'Kaan Güneş'],
+      weekStartDate: mondayStr,
+    }
+  ]
 }
 
 function formatShortTurkishDate(date) {
@@ -147,8 +159,10 @@ function SchedulePage() {
   const [editingSeriesId, setEditingSeriesId] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null) // lesson object
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [lessons, setLessons] = useState(MOCK_LESSONS)
+  const [selectedLesson, setSelectedLesson] = useState(null) // for detail modal
+  const [lessons, setLessons] = useState(getInitialMockLessons)
   const [scheduleView, setScheduleView] = useState('week') // week | month | quarter
+  const [viewingWeekStart, setViewingWeekStart] = useState(() => getMondayOfWeek(new Date()))
   // TODO(backend): Replace this with "today" coming from backend (server time / user's timezone decision).
   const backendToday = useMemo(() => startOfDay(new Date()), [])
 
@@ -164,13 +178,22 @@ function SchedulePage() {
     selectedStudents: [],
   })
 
+  const viewingWeekStartStr = useMemo(() => getDateString(viewingWeekStart), [viewingWeekStart])
+
   const lessonsByDay = useMemo(() => {
     const grouped = {}
     DAYS_OF_WEEK.forEach((day) => {
-      grouped[day] = lessons.filter((lesson) => lesson.day === day)
+      grouped[day] = lessons.filter((lesson) => {
+        // Sadece görüntülenen haftaya ait dersleri filtrele
+        if (lesson.weekStartDate) {
+          return lesson.day === day && lesson.weekStartDate === viewingWeekStartStr
+        }
+        // Eski veri için (weekStartDate yoksa) tüm dersleri göster
+        return lesson.day === day
+      })
     })
     return grouped
-  }, [lessons])
+  }, [lessons, viewingWeekStartStr])
 
   const calendarLessonTemplates = useMemo(() => {
     // TODO(backend): This is a temporary adapter.
@@ -225,15 +248,14 @@ function SchedulePage() {
   }, [lessonForm.groupQuery])
 
   const weekDatesByDay = useMemo(() => {
-    const monday = getMondayOfWeek(new Date())
     const map = {}
     DAYS_OF_WEEK.forEach((day, idx) => {
-      const date = new Date(monday)
-      date.setDate(monday.getDate() + idx)
+      const date = new Date(viewingWeekStart)
+      date.setDate(viewingWeekStart.getDate() + idx)
       map[day] = date
     })
     return map
-  }, [])
+  }, [viewingWeekStart])
 
   const handleLogout = () => {
     setAuthenticated(false)
@@ -370,6 +392,11 @@ function SchedulePage() {
     return registerModal('schedule-delete-confirm', handleCloseDeleteModal)
   }, [showDeleteModal, registerModal])
 
+  useEffect(() => {
+    if (!selectedLesson) return undefined
+    return registerModal('schedule-lesson-detail', handleCloseLessonDetail)
+  }, [selectedLesson, registerModal])
+
   const handleToggleStudent = (studentName) => {
     setLessonForm((prev) => {
       const exists = prev.selectedStudents.includes(studentName)
@@ -410,20 +437,26 @@ function SchedulePage() {
     const groupNames = lessonForm.selectedGroups
     const classNameLabel = groupNames.length > 0 ? groupNames.join(', ') : '—'
 
-    const newLessons = Array.from({ length: safeRepeatWeeks }, (_, index) => ({
-      id: seriesId + index,
-      seriesId,
-      seriesWeekIndex: index + 1,
-      seriesWeekCount: safeRepeatWeeks,
-      day,
-      subject,
-      className: classNameLabel,
-      groupNames,
-      description,
-      startTime,
-      endTime,
-      participants: lessonForm.selectedStudents,
-    }))
+    // Her hafta için ayrı ders oluştur, her birine o haftanın başlangıç tarihini ekle
+    const baseMonday = getMondayOfWeek(new Date())
+    const newLessons = Array.from({ length: safeRepeatWeeks }, (_, index) => {
+      const weekStart = addDays(baseMonday, index * 7)
+      return {
+        id: seriesId + index,
+        seriesId,
+        seriesWeekIndex: index + 1,
+        seriesWeekCount: safeRepeatWeeks,
+        day,
+        subject,
+        className: classNameLabel,
+        groupNames,
+        description,
+        startTime,
+        endTime,
+        participants: lessonForm.selectedStudents,
+        weekStartDate: getDateString(weekStart),
+      }
+    })
 
     setLessons((prev) => {
       if (lessonModalMode !== 'edit' || !editingSeriesId) return [...prev, ...newLessons]
@@ -445,8 +478,23 @@ function SchedulePage() {
     })
   }
 
+  const handleOpenLessonDetail = (lesson) => {
+    setSelectedLesson(lesson)
+  }
+
+  const handleCloseLessonDetail = () => {
+    setSelectedLesson(null)
+  }
+
   const renderLessonCard = (lesson) => (
-    <div key={lesson.id} className="schedule-lesson-card">
+    <div
+      key={lesson.id}
+      className="schedule-lesson-card schedule-lesson-card--clickable"
+      onClick={() => handleOpenLessonDetail(lesson)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpenLessonDetail(lesson) }}
+    >
       <div className="schedule-lesson-header">
         <div className="schedule-lesson-header__top">
           <div className="schedule-lesson-header__text">
@@ -458,7 +506,7 @@ function SchedulePage() {
             <button
               type="button"
               className="schedule-lesson-edit"
-              onClick={() => handleEditLesson(lesson)}
+              onClick={(e) => { e.stopPropagation(); handleEditLesson(lesson) }}
               aria-label={`${lesson.subject} dersini düzenle`}
               title="Dersi düzenle"
             >
@@ -467,7 +515,7 @@ function SchedulePage() {
             <button
               type="button"
               className="schedule-lesson-delete"
-              onClick={() => handleOpenDeleteModal(lesson)}
+              onClick={(e) => { e.stopPropagation(); handleOpenDeleteModal(lesson) }}
               aria-label={`${lesson.subject} dersini sil`}
               title="Dersi sil"
             >
@@ -718,9 +766,39 @@ function SchedulePage() {
           </div>
 
           {scheduleView === 'week' && (
-            <div className="schedule-grid">
-              {DAYS_OF_WEEK.map(renderDayCard)}
-            </div>
+            <>
+              <div className="schedule-week-nav">
+                <button
+                  type="button"
+                  className="schedule-week-nav__btn"
+                  onClick={() => setViewingWeekStart((prev) => addDays(prev, -7))}
+                  aria-label="Önceki hafta"
+                >
+                  <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                </button>
+                <div className="schedule-week-nav__label">
+                  {formatShortTurkishDate(viewingWeekStart)} - {formatShortTurkishDate(addDays(viewingWeekStart, 4))}
+                </div>
+                <button
+                  type="button"
+                  className="schedule-week-nav__btn"
+                  onClick={() => setViewingWeekStart((prev) => addDays(prev, 7))}
+                  aria-label="Sonraki hafta"
+                >
+                  <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </button>
+                <button
+                  type="button"
+                  className="schedule-week-nav__today"
+                  onClick={() => setViewingWeekStart(getMondayOfWeek(new Date()))}
+                >
+                  Bugün
+                </button>
+              </div>
+              <div className="schedule-grid">
+                {DAYS_OF_WEEK.map(renderDayCard)}
+              </div>
+            </>
           )}
 
           {scheduleView !== 'week' && (
@@ -973,6 +1051,91 @@ function SchedulePage() {
                 İptal
               </button>
               <button type="button" className="schedule-confirm-btn schedule-confirm-btn--danger" onClick={handleConfirmDelete}>
+                Sil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lesson Detail Modal */}
+      {selectedLesson && (
+        <div className="schedule-detail-overlay" onClick={handleCloseLessonDetail} role="dialog" aria-modal="true">
+          <div className="schedule-detail-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="schedule-detail-close"
+              onClick={handleCloseLessonDetail}
+              aria-label="Modali kapat"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+
+            <div className="schedule-detail-header">
+              <div className="schedule-detail-badge" aria-hidden="true">
+                <span className="material-symbols-outlined">event</span>
+              </div>
+              <div className="schedule-detail-header__text">
+                <div className="schedule-detail-type">Ders Detayı</div>
+                <h2 className="schedule-detail-title">{selectedLesson.subject}</h2>
+              </div>
+            </div>
+
+            <div className="schedule-detail-info-grid">
+              <div className="schedule-detail-info-item">
+                <div className="schedule-detail-info-label">Sınıf / Grup</div>
+                <div className="schedule-detail-info-value">{selectedLesson.className}</div>
+              </div>
+              <div className="schedule-detail-info-item">
+                <div className="schedule-detail-info-label">Gün</div>
+                <div className="schedule-detail-info-value">{selectedLesson.day}</div>
+              </div>
+              <div className="schedule-detail-info-item">
+                <div className="schedule-detail-info-label">Saat</div>
+                <div className="schedule-detail-info-value">{selectedLesson.startTime} - {selectedLesson.endTime}</div>
+              </div>
+              {selectedLesson.seriesWeekCount > 1 && (
+                <div className="schedule-detail-info-item">
+                  <div className="schedule-detail-info-label">Hafta</div>
+                  <div className="schedule-detail-info-value">{selectedLesson.seriesWeekIndex} / {selectedLesson.seriesWeekCount}</div>
+                </div>
+              )}
+            </div>
+
+            {selectedLesson.description && (
+              <div className="schedule-detail-section">
+                <div className="schedule-detail-section__title">Açıklama</div>
+                <p className="schedule-detail-description">{selectedLesson.description}</p>
+              </div>
+            )}
+
+            <div className="schedule-detail-section">
+              <div className="schedule-detail-section__title">Katılımcılar ({selectedLesson.participants.length})</div>
+              <div className="schedule-detail-participants">
+                {selectedLesson.participants.map((participant, index) => (
+                  <div key={index} className="schedule-detail-participant">
+                    <span className="material-symbols-outlined schedule-detail-participant__icon" aria-hidden="true">person</span>
+                    <span className="schedule-detail-participant__name">{participant}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="schedule-detail-actions">
+              <button
+                type="button"
+                className="schedule-detail-btn schedule-detail-btn--secondary"
+                onClick={() => { handleCloseLessonDetail(); handleEditLesson(selectedLesson) }}
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">edit</span>
+                Düzenle
+              </button>
+              <button
+                type="button"
+                className="schedule-detail-btn schedule-detail-btn--danger"
+                onClick={() => { handleCloseLessonDetail(); handleOpenDeleteModal(selectedLesson) }}
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                 Sil
               </button>
             </div>
