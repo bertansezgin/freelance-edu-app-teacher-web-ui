@@ -133,6 +133,19 @@ function HomeworkAnnouncementsPage() {
     files: [], // { id, name, type }
   })
 
+  const [showAddAnnouncementModal, setShowAddAnnouncementModal] = useState(false)
+  const [showEditAnnouncementModal, setShowEditAnnouncementModal] = useState(false)
+  const [editingAnnouncementId, setEditingAnnouncementId] = useState(null)
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: '',
+    groupQuery: '',
+    selectedGroups: [],
+    date: '',
+    description: '',
+    studentQuery: '',
+    selectedStudents: [],
+  })
+
   const items = useMemo(() => {
     return activeTab === 'homeworks' ? homeworks : announcements
   }, [activeTab, homeworks, announcements])
@@ -200,16 +213,45 @@ function HomeworkAnnouncementsPage() {
       return
     }
 
-    // TODO: Duyuru ekleme modalı
-    console.log('Add announcement')
+    // Duyuru ekleme için
+    setAnnouncementForm({
+      title: '',
+      groupQuery: '',
+      selectedGroups: [],
+      date: '',
+      description: '',
+      studentQuery: '',
+      selectedStudents: [],
+    })
+    setShowAddAnnouncementModal(true)
   }
 
   const handleEdit = (itemType, id) => {
-    if (itemType !== 'homeworks') {
-      // TODO: Duyuru düzenleme modalı
-      console.log('Edit announcement', id)
+    if (itemType === 'announcements') {
+      const target = announcements.find((a) => a.id === id)
+      if (!target) return
+
+      const selectedGroups = Array.isArray(target.groupNames)
+        ? target.groupNames
+        : target.className && target.className !== '—'
+          ? [target.className]
+          : []
+
+      setEditingAnnouncementId(id)
+      setAnnouncementForm({
+        title: target.title ?? '',
+        groupQuery: '',
+        selectedGroups,
+        date: toDateInputValue(target.date),
+        description: target.description === '—' ? '' : (target.description ?? ''),
+        studentQuery: '',
+        selectedStudents: target.targetStudents ?? [],
+      })
+      setShowEditAnnouncementModal(true)
       return
     }
+
+    if (itemType !== 'homeworks') return
 
     const target = homeworks.find((h) => h.id === id)
     if (!target) return
@@ -263,6 +305,21 @@ function HomeworkAnnouncementsPage() {
     return registerModal('homework-add', handleCloseAddHomeworkModal)
   }, [showAddHomeworkModal, registerModal])
 
+  useEffect(() => {
+    if (!showAddAnnouncementModal) return undefined
+    return registerModal('announcement-add', handleCloseAddAnnouncementModal)
+  }, [showAddAnnouncementModal, registerModal])
+
+  const handleCloseEditAnnouncementModal = () => {
+    setShowEditAnnouncementModal(false)
+    setEditingAnnouncementId(null)
+  }
+
+  useEffect(() => {
+    if (!showEditAnnouncementModal) return undefined
+    return registerModal('announcement-edit', handleCloseEditAnnouncementModal)
+  }, [showEditAnnouncementModal, registerModal])
+
   const handleCloseEditHomeworkModal = () => {
     setShowEditHomeworkModal(false)
     setEditingHomeworkId(null)
@@ -285,6 +342,12 @@ function HomeworkAnnouncementsPage() {
     return CLASS_GROUP_OPTIONS.filter((name) => name.toLowerCase().includes(query))
   }, [homeworkForm.groupQuery])
 
+  const filteredAnnouncementStudents = useMemo(() => {
+    const query = announcementForm.studentQuery.trim().toLowerCase()
+    if (!query) return MOCK_STUDENTS
+    return MOCK_STUDENTS.filter((name) => name.toLowerCase().includes(query))
+  }, [announcementForm.studentQuery])
+
   const handleToggleHomeworkStudent = (studentName) => {
     setHomeworkForm((prev) => {
       const exists = prev.selectedStudents.includes(studentName)
@@ -305,6 +368,18 @@ function HomeworkAnnouncementsPage() {
         selectedGroups: exists
           ? prev.selectedGroups.filter((name) => name !== groupName)
           : [...prev.selectedGroups, groupName],
+      }
+    })
+  }
+
+  const handleToggleAnnouncementStudent = (studentName) => {
+    setAnnouncementForm((prev) => {
+      const exists = prev.selectedStudents.includes(studentName)
+      return {
+        ...prev,
+        selectedStudents: exists
+          ? prev.selectedStudents.filter((name) => name !== studentName)
+          : [...prev.selectedStudents, studentName],
       }
     })
   }
@@ -383,6 +458,79 @@ function HomeworkAnnouncementsPage() {
 
     setShowEditHomeworkModal(false)
     setEditingHomeworkId(null)
+  }
+
+  const handleSubmitAnnouncement = (e) => {
+    e.preventDefault()
+    const title = announcementForm.title.trim()
+    if (!title) return
+
+    const groupNames = announcementForm.selectedGroups
+    const classNameLabel = groupNames.length > 0 ? groupNames.join(', ') : '—'
+
+    const newAnnouncement = {
+      id: Date.now(),
+      title,
+      className: classNameLabel,
+      groupNames,
+      date: announcementForm.date || '—',
+      description: announcementForm.description.trim() || '—',
+      targetStudents: announcementForm.selectedStudents,
+    }
+
+    setAnnouncements((prev) => [newAnnouncement, ...prev])
+    setShowAddAnnouncementModal(false)
+  }
+
+  const handleSubmitAnnouncementEdit = (e) => {
+    e.preventDefault()
+    if (!editingAnnouncementId) return
+
+    const title = announcementForm.title.trim()
+    if (!title) return
+
+    const groupNames = announcementForm.selectedGroups
+    const classNameLabel = groupNames.length > 0 ? groupNames.join(', ') : '—'
+
+    setAnnouncements((prev) => {
+      return prev.map((a) => {
+        if (a.id !== editingAnnouncementId) return a
+        return {
+          ...a,
+          title,
+          groupNames,
+          className: classNameLabel,
+          date: announcementForm.date || '—',
+          description: announcementForm.description.trim() || '—',
+          targetStudents: announcementForm.selectedStudents,
+        }
+      })
+    })
+
+    setShowEditAnnouncementModal(false)
+    setEditingAnnouncementId(null)
+  }
+
+  const handleCloseAddAnnouncementModal = () => {
+    setShowAddAnnouncementModal(false)
+  }
+
+  const filteredAnnouncementGroups = useMemo(() => {
+    const query = announcementForm.groupQuery.trim().toLowerCase()
+    if (!query) return CLASS_GROUP_OPTIONS
+    return CLASS_GROUP_OPTIONS.filter((name) => name.toLowerCase().includes(query))
+  }, [announcementForm.groupQuery])
+
+  const handleToggleAnnouncementGroup = (groupName) => {
+    setAnnouncementForm((prev) => {
+      const exists = prev.selectedGroups.includes(groupName)
+      return {
+        ...prev,
+        selectedGroups: exists
+          ? prev.selectedGroups.filter((name) => name !== groupName)
+          : [...prev.selectedGroups, groupName],
+      }
+    })
   }
 
   return (
@@ -1078,6 +1226,282 @@ function HomeworkAnnouncementsPage() {
                 </button>
                 <button type="submit" className="homework-add-btn-primary">
                   Kaydet
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAddAnnouncementModal && (
+        <div className="homework-add-overlay" onClick={handleCloseAddAnnouncementModal} role="dialog" aria-modal="true">
+          <div className="homework-add-modal homework-add-modal--announcement" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="homework-add-close" onClick={handleCloseAddAnnouncementModal} aria-label="Modali kapat">
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+
+            <h2 className="homework-add-title">Duyuru Ekle</h2>
+
+            <form className="homework-add-form" onSubmit={handleSubmitAnnouncement}>
+              <div className="homework-add-grid homework-add-grid--announcement">
+                <div className="homework-add-left">
+                  <div className="homework-add-field">
+                    <label className="homework-add-label" htmlFor="announcement-title">Duyuru Başlığı</label>
+                    <input
+                      id="announcement-title"
+                      className="homework-add-input"
+                      placeholder="Örn: Veli Toplantısı"
+                      value={announcementForm.title}
+                      onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, title: e.target.value }))}
+                      required
+                    />
+                  </div>
+
+                  <div className="homework-add-field">
+                    <label className="homework-add-label" htmlFor="announcement-date">Tarih</label>
+                    <input
+                      id="announcement-date"
+                      className="homework-add-input"
+                      type="date"
+                      value={announcementForm.date}
+                      onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, date: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="homework-add-field">
+                    <label className="homework-add-label" htmlFor="announcement-desc">Açıklama</label>
+                    <textarea
+                      id="announcement-desc"
+                      className="homework-add-textarea"
+                      placeholder="Duyuru içeriğini yazınız..."
+                      value={announcementForm.description}
+                      onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, description: e.target.value }))}
+                      rows={8}
+                    />
+                  </div>
+                </div>
+
+                <div className="homework-add-right">
+                  <div className="homework-add-field">
+                    <div className="homework-add-label">Sınıf/Grup Seçimi (İsteğe Bağlı)</div>
+                    <div className="homework-add-groups">
+                      <div className="homework-add-groups__search">
+                        <span className="material-symbols-outlined homework-add-groups__search-icon" aria-hidden="true">search</span>
+                        <input
+                          type="search"
+                          className="homework-add-groups__search-input"
+                          placeholder="Sınıf/Grup ara..."
+                          value={announcementForm.groupQuery}
+                          onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, groupQuery: e.target.value }))}
+                        />
+                      </div>
+
+                      <div className="homework-add-groups__list" role="list">
+                        {filteredAnnouncementGroups.map((groupName) => {
+                          const checked = announcementForm.selectedGroups.includes(groupName)
+                          return (
+                            <label key={groupName} className="homework-add-groups__item" role="listitem">
+                              <input
+                                type="checkbox"
+                                className="homework-add-groups__checkbox"
+                                checked={checked}
+                                onChange={() => handleToggleAnnouncementGroup(groupName)}
+                              />
+                              <span className="homework-add-groups__name">{groupName}</span>
+                            </label>
+                          )
+                        })}
+
+                        {filteredAnnouncementGroups.length === 0 && (
+                          <div className="homework-add-groups__empty">Grup bulunamadı</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="homework-add-students">
+                    <div className="homework-add-students__header">
+                      <div className="homework-add-label">Öğrenci Seçimi</div>
+                      <div className="homework-add-students__search">
+                        <span className="material-symbols-outlined homework-add-students__search-icon" aria-hidden="true">search</span>
+                        <input
+                          type="search"
+                          className="homework-add-students__search-input"
+                          placeholder="Öğrenci ara..."
+                          value={announcementForm.studentQuery}
+                          onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, studentQuery: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="homework-add-students__list" role="list">
+                      {filteredAnnouncementStudents.map((student) => {
+                        const checked = announcementForm.selectedStudents.includes(student)
+                        return (
+                          <label key={student} className="homework-add-students__item" role="listitem">
+                            <input
+                              type="checkbox"
+                              className="homework-add-students__checkbox"
+                              checked={checked}
+                              onChange={() => handleToggleAnnouncementStudent(student)}
+                            />
+                            <span className="homework-add-students__name">{student}</span>
+                          </label>
+                        )
+                      })}
+
+                      {filteredAnnouncementStudents.length === 0 && (
+                        <div className="homework-add-students__empty">Öğrenci bulunamadı</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="homework-add-actions">
+                <button type="button" className="homework-add-btn-secondary" onClick={handleCloseAddAnnouncementModal}>
+                  Vazgeç
+                </button>
+                <button type="submit" className="homework-add-btn-primary">
+                  Kaydet
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showEditAnnouncementModal && (
+        <div className="homework-add-overlay" onClick={handleCloseEditAnnouncementModal} role="dialog" aria-modal="true">
+          <div className="homework-add-modal homework-add-modal--announcement" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="homework-add-close" onClick={handleCloseEditAnnouncementModal} aria-label="Modali kapat">
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+
+            <h2 className="homework-add-title">Duyuru Düzenle</h2>
+
+            <form className="homework-add-form" onSubmit={handleSubmitAnnouncementEdit}>
+              <div className="homework-add-grid homework-add-grid--announcement">
+                <div className="homework-add-left">
+                  <div className="homework-add-field">
+                    <label className="homework-add-label" htmlFor="announcement-title-edit">Duyuru Başlığı</label>
+                    <input
+                      id="announcement-title-edit"
+                      className="homework-add-input"
+                      placeholder="Örn: Veli Toplantısı"
+                      value={announcementForm.title}
+                      onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, title: e.target.value }))}
+                      required
+                    />
+                  </div>
+
+                  <div className="homework-add-field">
+                    <label className="homework-add-label" htmlFor="announcement-date-edit">Tarih</label>
+                    <input
+                      id="announcement-date-edit"
+                      className="homework-add-input"
+                      type="date"
+                      value={announcementForm.date}
+                      onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, date: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="homework-add-field">
+                    <label className="homework-add-label" htmlFor="announcement-desc-edit">Açıklama</label>
+                    <textarea
+                      id="announcement-desc-edit"
+                      className="homework-add-textarea"
+                      placeholder="Duyuru içeriğini yazınız..."
+                      value={announcementForm.description}
+                      onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, description: e.target.value }))}
+                      rows={8}
+                    />
+                  </div>
+                </div>
+
+                <div className="homework-add-right">
+                  <div className="homework-add-field">
+                    <div className="homework-add-label">Sınıf/Grup Seçimi (İsteğe Bağlı)</div>
+                    <div className="homework-add-groups">
+                      <div className="homework-add-groups__search">
+                        <span className="material-symbols-outlined homework-add-groups__search-icon" aria-hidden="true">search</span>
+                        <input
+                          type="search"
+                          className="homework-add-groups__search-input"
+                          placeholder="Sınıf/Grup ara..."
+                          value={announcementForm.groupQuery}
+                          onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, groupQuery: e.target.value }))}
+                        />
+                      </div>
+
+                      <div className="homework-add-groups__list" role="list">
+                        {filteredAnnouncementGroups.map((groupName) => {
+                          const checked = announcementForm.selectedGroups.includes(groupName)
+                          return (
+                            <label key={groupName} className="homework-add-groups__item" role="listitem">
+                              <input
+                                type="checkbox"
+                                className="homework-add-groups__checkbox"
+                                checked={checked}
+                                onChange={() => handleToggleAnnouncementGroup(groupName)}
+                              />
+                              <span className="homework-add-groups__name">{groupName}</span>
+                            </label>
+                          )
+                        })}
+
+                        {filteredAnnouncementGroups.length === 0 && (
+                          <div className="homework-add-groups__empty">Grup bulunamadı</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="homework-add-students">
+                    <div className="homework-add-students__header">
+                      <div className="homework-add-label">Öğrenci Seçimi</div>
+                      <div className="homework-add-students__search">
+                        <span className="material-symbols-outlined homework-add-students__search-icon" aria-hidden="true">search</span>
+                        <input
+                          type="search"
+                          className="homework-add-students__search-input"
+                          placeholder="Öğrenci ara..."
+                          value={announcementForm.studentQuery}
+                          onChange={(e) => setAnnouncementForm((prev) => ({ ...prev, studentQuery: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="homework-add-students__list" role="list">
+                      {filteredAnnouncementStudents.map((student) => {
+                        const checked = announcementForm.selectedStudents.includes(student)
+                        return (
+                          <label key={student} className="homework-add-students__item" role="listitem">
+                            <input
+                              type="checkbox"
+                              className="homework-add-students__checkbox"
+                              checked={checked}
+                              onChange={() => handleToggleAnnouncementStudent(student)}
+                            />
+                            <span className="homework-add-students__name">{student}</span>
+                          </label>
+                        )
+                      })}
+
+                      {filteredAnnouncementStudents.length === 0 && (
+                        <div className="homework-add-students__empty">Öğrenci bulunamadı</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="homework-add-actions">
+                <button type="button" className="homework-add-btn-secondary" onClick={handleCloseEditAnnouncementModal}>
+                  Vazgeç
+                </button>
+                <button type="submit" className="homework-add-btn-primary">
+                  Güncelle
                 </button>
               </div>
             </form>

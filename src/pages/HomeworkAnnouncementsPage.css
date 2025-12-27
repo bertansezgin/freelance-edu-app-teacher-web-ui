@@ -703,6 +703,23 @@
   overflow: hidden;
 }
 
+.homework-add-grid--single {
+  grid-template-columns: 1fr;
+}
+
+.homework-add-modal--announcement .homework-add-title {
+  margin-bottom: var(--spacing-5);
+}
+
+.homework-add-grid--announcement {
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-6);
+}
+
+.homework-add-modal--announcement .homework-add-groups__list {
+  max-height: 160px;
+}
+
 .homework-add-left {
   min-height: 0;
   display: flex;
@@ -716,7 +733,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-5);
+  gap: var(--spacing-4);
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: var(--spacing-2);
@@ -934,6 +951,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 320px;
 }
 
 /* Group Selection (same UX as student selection) */
@@ -984,7 +1002,7 @@
 }
 
 .homework-add-groups__list {
-  max-height: 220px;
+  max-height: 160px;
   overflow-y: auto;
   padding: var(--spacing-2);
   display: flex;

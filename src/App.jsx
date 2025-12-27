@@ -32,17 +32,17 @@ function App() {
   return (
     <ModalStackProvider>
       <AppEscHandler>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={authed ? <TeacherDashboard /> : <Navigate to="/login" replace />} />
             <Route path="/students" element={authed ? <StudentsPage /> : <Navigate to="/login" replace />} />
             <Route path="/schedule" element={authed ? <SchedulePage /> : <Navigate to="/login" replace />} />
             <Route path="/homework" element={authed ? <HomeworkAnnouncementsPage /> : <Navigate to="/login" replace />} />
             <Route path="/" element={<Navigate to={authed ? '/dashboard' : '/login'} replace />} />
-          </Routes>
-        </BrowserRouter>
+      </Routes>
+    </BrowserRouter>
       </AppEscHandler>
     </ModalStackProvider>
   )
